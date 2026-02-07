@@ -53,7 +53,7 @@ public abstract class %s {
 		notification_timeout = 3000, -- Timeout for notifications in milliseconds
 		java_version = 17,
 		src_patterns = { "src/main/java", "src/test/java", "src" },
-		project_markers = { "pom.xml", "build.gradle", "settings.gradle", ".project", "backend" },
+		project_markers = { "pom.xml", "build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts", ".project" },
 		custom_src_path = nil,
 	},
 }
@@ -222,11 +222,7 @@ function utils.find_java_project_root(start_dir)
 	while current_dir ~= "/" and current_dir ~= "" do
 		for _, marker in ipairs(M.config.options.project_markers) do
 			local marker_path = current_dir .. "/" .. marker
-			if marker == "backend" then
-				if vim.fn.isdirectory(marker_path) == 1 and vim.fn.isdirectory(marker_path .. "/src") == 1 then
-					return current_dir
-				end
-			elseif vim.fn.filereadable(marker_path) == 1 or vim.fn.isdirectory(marker_path) == 1 then
+			if vim.fn.filereadable(marker_path) == 1 or vim.fn.isdirectory(marker_path) == 1 then
 				return current_dir
 			end
 		end
@@ -252,19 +248,16 @@ function utils.find_java_src_dir(project_root)
 		end
 	end
 
-	local nested_paths = { "", "backend", "src", "src/main/java" }
+	-- Explicit list of candidate paths, ordered by specificity
+	local candidates = {}
+	for _, pattern in ipairs(M.config.options.src_patterns) do
+		table.insert(candidates, project_root .. "/" .. pattern)
+		table.insert(candidates, project_root .. "/backend/" .. pattern)
+	end
 
-	for _, nested_path in ipairs(nested_paths) do
-		local base_path = project_root
-		if nested_path ~= "" then
-			base_path = base_path .. "/" .. nested_path
-		end
-
-		for _, pattern in ipairs(M.config.options.src_patterns) do
-			local src_candidate = base_path .. "/" .. pattern
-			if vim.fn.isdirectory(src_candidate) == 1 then
-				return src_candidate
-			end
+	for _, candidate in ipairs(candidates) do
+		if vim.fn.isdirectory(candidate) == 1 then
+			return candidate
 		end
 	end
 

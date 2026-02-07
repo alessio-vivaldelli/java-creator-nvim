@@ -70,7 +70,7 @@ Suggested configuration is:
           use_notify = true,
           custom_src_path = "backend/src/main/java",
           src_patterns = { "src/main/java", "src/test/java", "src" },
-          project_markers = { "pom.xml", "build.gradle", "settings.gradle", ".project", "backend" },
+          project_markers = { "pom.xml", "build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts", ".project" },
           notification_timeout = 3000,
         },
         keymaps = {
@@ -175,10 +175,11 @@ public abstract class %s {
     },
     project_markers = {          -- Files that identify a Java project
       "pom.xml", 
-      "build.gradle", 
-      "settings.gradle", 
-      ".project", 
-      "backend"
+      "build.gradle",
+      "build.gradle.kts",
+      "settings.gradle",
+      "settings.gradle.kts",
+      ".project"
     },
     custom_src_path = nil,       -- Custom source path (optional)
 ```
