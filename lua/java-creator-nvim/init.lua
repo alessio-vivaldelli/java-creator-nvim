@@ -405,10 +405,13 @@ function utils.generate_file_content(java_type, package, name)
 		return nil, "Template not found for type: " .. java_type
 	end
 
-	-- Generate base content without package first
-	local base_content = string.format(template, "", name):gsub("package ;\n\n", "")
+	-- Build the package declaration
+	local package_line = ""
+	if package and package ~= "" then
+		package_line = "package " .. package .. ";\n\n"
+	end
 
-	-- Add default imports
+	-- Build import lines
 	local imports = M.config.default_imports[java_type] or {}
 	local import_lines = ""
 	if #imports > 0 then
@@ -418,26 +421,20 @@ function utils.generate_file_content(java_type, package, name)
 		import_lines = import_lines .. "\n"
 	end
 
-	-- Build the package line (only if specified)
-	local package_line = ""
+	-- Fill the template with the actual package and name
+	-- Templates use %s for package and %s for name
+	local body
 	if package and package ~= "" then
-		package_line = "package " .. package .. ";\n\n"
+		body = string.format(template, package, name)
+		-- Replace the package line from the template with our version that includes imports
+		body = body:gsub("^package " .. package:gsub("%.", "%%.") .. ";\n\n", package_line .. import_lines)
+	else
+		-- Remove the package declaration from the template output
+		body = string.format(template, "", name)
+		body = body:gsub("^package ;\n\n", import_lines)
 	end
 
-	-- Handle record template separately for proper formatting
-	if java_type == "record" then
-		return string.format(
-			[[%s%spublic record %s() {
-    
-}]],
-			package_line,
-			import_lines,
-			name
-		)
-	end
-
-	-- Combine all parts
-	return package_line .. import_lines .. base_content
+	return body
 end
 
 local input = {}
