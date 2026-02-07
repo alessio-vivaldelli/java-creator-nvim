@@ -71,7 +71,6 @@ Suggested configuration is:
           custom_src_path = "backend/src/main/java",
           src_patterns = { "src/main/java", "src/test/java", "src" },
           project_markers = { "pom.xml", "build.gradle", "settings.gradle", ".project", "backend" },
-          package_selection_style = "hybrid",
           notification_timeout = 3000,
         },
         keymaps = {
@@ -94,7 +93,6 @@ Suggested configuration is:
     ft = "java",
     event = "VeryLazy",
     dependencies = {
-      { "nvim-telescope/telescope.nvim", optional = true },
       { "rcarriga/nvim-notify", optional = true },
     },
   },
@@ -183,7 +181,6 @@ public abstract class %s {
       "backend"
     },
     custom_src_path = nil,       -- Custom source path (optional)
-    package_selection_style = "hybrid", -- Package selection style: "auto", "menu", or "hybrid"
 ```
 
 - **Templates**: Customize the initial content for different Java file types.
@@ -195,4 +192,3 @@ public abstract class %s {
   - `java_version`: Sets the target Java version (affects feature availability like records).
   - `src_patterns`: Directories where Java source files are searched.
   - `project_markers`: Files/directories that identify a Java project root.
-  - `package_selection_style`: Controls how packages are selected ("auto", "menu", or "hybrid").

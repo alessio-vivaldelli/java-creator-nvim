@@ -55,7 +55,6 @@ public abstract class %s {
 		src_patterns = { "src/main/java", "src/test/java", "src" },
 		project_markers = { "pom.xml", "build.gradle", "settings.gradle", ".project", "backend" },
 		custom_src_path = nil,
-		package_selection_style = "hybrid", -- "auto", "menu" or "hybrid"
 	},
 }
 
@@ -285,47 +284,6 @@ function utils.get_package_base()
 end
 
 ---
---- Extracts the last part of a dot-separated package string.
----
----@param input string The full package string.
----@return string The last fragment of the package.
-function utils.get_current_package_fragment(input)
-	if not input or input == "" then
-		return ""
-	end
-	return input:match("([^.]+)$") or ""
-end
-
----
---- Finds package names matching a given fragment.
----
----@param base string The base source directory.
----@param fragment string The package fragment to search for.
----@return table A list of matching package names.
-function utils.get_package_matches(base, fragment)
-	local matches = {}
-	if not base or not fragment then
-		return matches
-	end
-
-	local pattern = fragment:gsub("%.", "/")
-	local search_path = base .. "/**/" .. pattern .. "*/"
-	local dirs = vim.fn.glob(search_path, false, true)
-
-	for _, dir in ipairs(dirs) do
-		if dir:sub(1, #base) == base then
-			local relative = dir:sub(#base + 2, -2)
-			if relative ~= "" then
-				local package_name = relative:gsub("/", ".")
-				table.insert(matches, package_name)
-			end
-		end
-	end
-
-	return matches
-end
-
----
 --- Finds all available packages within the source directory.
 ---
 ---@return table A sorted list of all found package names.
@@ -417,9 +375,8 @@ end
 ---
 ---@param package string The package name.
 ---@param name string The class/interface/enum name.
----@param java_type string The type of Java file (e.g., 'class').
 ---@return string The generated file path.
-function utils.generate_file_path(package, name, java_type)
+function utils.generate_file_path(package, name)
 	local src_dir = utils.get_package_base() or vim.fn.getcwd()
 
 	if package and package ~= "" then
@@ -528,30 +485,6 @@ function input.get_string(prompt, default, callback)
 end
 
 ---
---- Prompts for package input with completion.
----
----@param prompt string The prompt message.
----@param default string The default value.
----@param callback function The callback function.
----@param src_dir string The source directory for completion.
-function input.get_package_input(prompt, default, callback, src_dir)
-	vim.ui.input({
-		prompt = prompt,
-		default = default or "",
-		completion = function(arg_lead)
-			if not src_dir then
-				return {}
-			end
-			local fragment = utils.get_current_package_fragment(arg_lead)
-			if fragment == "" then
-				return {}
-			end
-			return utils.get_package_matches(src_dir, fragment)
-		end,
-	}, callback)
-end
-
----
 --- Prompts the user to select or create a package.
 ---
 ---@param prompt string The prompt message.
@@ -609,20 +542,6 @@ function input.get_package(prompt, default, callback)
 end
 
 ---
---- Provides completion for package names.
---- Used for command-line completion.
----
----@param arg_lead string The leading part of the argument.
----@return table A list of matching package names.
-function M.complete_packages(arg_lead, cmd_line, cursor_pos)
-	local src_dir = utils.get_package_base()
-	if not src_dir then
-		return {}
-	end
-	local fragment = utils.get_current_package_fragment(arg_lead)
-	return utils.get_package_matches(src_dir, fragment)
-end
-
 ---
 --- Creates the Java file after validating inputs.
 ---
@@ -647,7 +566,7 @@ function M.create_java_file(java_type, name, package)
 		return
 	end
 
-	local file_path = utils.generate_file_path(package, name, java_type)
+	local file_path = utils.generate_file_path(package, name)
 	if vim.fn.filereadable(file_path) == 1 then
 		utils.error("File already exists: " .. file_path)
 		return
