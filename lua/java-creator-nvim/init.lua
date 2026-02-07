@@ -83,7 +83,7 @@ function utils.notify(msg, level)
 		})
 	else
 		-- Fallback to the standard vim.notify
-		vim.notify(msg, { title = "Java Creator", level = level })
+		vim.notify(msg, level)
 	end
 end
 
@@ -184,7 +184,7 @@ function utils.validate_java_name(name)
 	}
 
 	for _, keyword in ipairs(java_keywords) do
-		if name:lower() == keyword then
+		if name == keyword then
 			return false, "Name cannot be a Java keyword: " .. keyword
 		end
 	end
@@ -502,7 +502,7 @@ function input.get_java_type(callback)
 		class = "Class",
 		interface = "Interface",
 		enum = "Enum",
-		record = "Record" .. (M.config.options.java_version < 14 and " (Java 14+)" or ""),
+		record = "Record" .. (M.config.options.java_version < 16 and " (Java 16+)" or ""),
 		abstract_class = "Abstract Class",
 	}
 
@@ -630,8 +630,8 @@ end
 ---@param name string The class/interface/enum name.
 ---@param package string The package name.
 function M.create_java_file(java_type, name, package)
-	if java_type == "record" and M.config.options.java_version < 14 then
-		utils.error("Records require Java 14 or higher. Current version: " .. M.config.options.java_version)
+	if java_type == "record" and M.config.options.java_version < 16 then
+		utils.error("Records require Java 16 or higher. Current version: " .. M.config.options.java_version)
 		return
 	end
 
@@ -669,7 +669,7 @@ function M.create_java_file(java_type, name, package)
 	file:close()
 
 	if M.config.options.auto_open then
-		vim.cmd("edit " .. file_path)
+		vim.cmd.edit(vim.fn.fnameescape(file_path))
 	end
 
 	utils.info(string.format("Created %s: %s", java_type, file_path))

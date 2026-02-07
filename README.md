@@ -63,7 +63,7 @@ Suggested configuration is:
   {
     "alessio-vivaldelli/java-creator-nvim",
     config = function()
-      require("java-creator").setup({
+      require("java-creator-nvim").setup({
         options = {
           java_version = 17,
           auto_open = true,
