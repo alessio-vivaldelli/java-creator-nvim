@@ -1,0 +1,202 @@
+*java-creator.txt*    Interactive Java file creator for Neovim
+
+Author:  Alessio Vivaldelli
+License: MIT
+Repository: https://github.com/alessio-vivaldelli/java-creator-nvim
+
+==============================================================================
+CONTENTS                                              *java-creator-contents*
+
+  1. Introduction .......................... |java-creator-introduction|
+  2. Setup ................................ |java-creator-setup|
+  3. Commands ............................. |java-creator-commands|
+  4. Configuration ........................ |java-creator-configuration|
+  5. Templates ............................ |java-creator-templates|
+  6. Project Detection .................... |java-creator-detection|
+
+==============================================================================
+1. INTRODUCTION                                   *java-creator-introduction*
+
+java-creator.nvim is a plugin that helps generate Java source files
+interactively. It provides an IDE-like workflow for creating classes,
+interfaces, enums, records, and abstract classes with automatic package
+detection and directory creation.
+
+==============================================================================
+2. SETUP                                                 *java-creator-setup*
+
+Using lazy.nvim: >lua
+
+  {
+    "alessio-vivaldelli/java-creator-nvim",
+    ft = "java",
+    opts = {
+      keymaps = {
+        java_new = "<leader>jn",
+      },
+      options = {
+        auto_open = true,
+        java_version = 17,
+      },
+    },
+  }
+<
+
+Call setup manually if not using `opts`: >lua
+
+  require("java-creator-nvim").setup({
+    options = { java_version = 17 },
+  })
+<
+
+==============================================================================
+3. COMMANDS                                           *java-creator-commands*
+
+                                                                    *:JavaNew*
+:JavaNew
+    Opens the interactive creation wizard. Prompts for Java type, name,
+    and package in sequence.
+
+                                                                  *:JavaClass*
+:JavaClass
+    Create a new Java class. Prompts for name and package.
+
+                                                              *:JavaInterface*
+:JavaInterface
+    Create a new Java interface. Prompts for name and package.
+
+                                                                   *:JavaEnum*
+:JavaEnum
+    Create a new Java enum. Prompts for name and package.
+
+                                                                 *:JavaRecord*
+:JavaRecord
+    Create a new Java record. Requires `java_version >= 16`.
+    Prompts for name and package.
+
+                                                          *:JavaAbstractClass*
+:JavaAbstractClass
+    Create a new Java abstract class. Prompts for name and package.
+
+==============================================================================
+4. CONFIGURATION                                *java-creator-configuration*
+
+All options are passed to `setup()`. Below are the defaults: >lua
+
+  {
+    templates = { ... },      -- See |java-creator-templates|
+    default_imports = {
+      class = {},
+      interface = {},
+      enum = {},
+      record = { "java.util.*" },
+      abstract_class = {},
+    },
+    keymaps = {
+      java_new = "<leader>jn",
+      java_class = "<leader>jc",
+      java_interface = "<leader>ji",
+      java_enum = "<leader>je",
+      java_record = "<leader>jr",
+      java_abstract_class = "<leader>ja",
+    },
+    options = {
+      auto_open = true,
+      use_notify = true,
+      notification_timeout = 3000,
+      java_version = 17,
+      src_patterns = {
+        "src/main/java",
+        "src/test/java",
+        "src",
+      },
+      project_markers = {
+        "pom.xml",
+        "build.gradle",
+        "build.gradle.kts",
+        "settings.gradle",
+        "settings.gradle.kts",
+        ".project",
+      },
+      custom_src_path = nil,
+    },
+  }
+<
+
+                                                   *java-creator-auto_open*
+auto_open              (default: true)
+    Automatically open the created file in a buffer after creation.
+
+                                                  *java-creator-use_notify*
+use_notify             (default: true)
+    Show notifications. Uses nvim-notify if available, otherwise falls
+    back to |vim.notify()|. Set to false to suppress all notifications.
+
+                                              *java-creator-java_version*
+java_version           (default: 17)
+    Target Java version. Affects feature availability (e.g., records
+    require Java 16+).
+
+                                              *java-creator-src_patterns*
+src_patterns           (default: {"src/main/java", "src/test/java", "src"})
+    Patterns used to locate the source directory within the project root.
+
+                                           *java-creator-project_markers*
+project_markers        (default: see above)
+    Files or directories that identify a Java project root. The plugin
+    walks up from the current directory looking for these markers.
+
+                                            *java-creator-custom_src_path*
+custom_src_path        (default: nil)
+    If set, this path (relative to project root) is checked first when
+    locating the source directory.
+
+==============================================================================
+5. TEMPLATES                                        *java-creator-templates*
+
+Templates use Lua's `string.format` with two `%s` placeholders:
+  1. Package name
+  2. Type name
+
+Default class template: >lua
+
+  [[package %s;
+
+  public class %s {
+      
+  }]]
+<
+
+You can customize templates per type: >lua
+
+  require("java-creator-nvim").setup({
+    templates = {
+      class = [[package %s;
+
+  import lombok.Data;
+
+  @Data
+  public class %s {
+      
+  }]],
+    },
+  })
+<
+
+==============================================================================
+6. PROJECT DETECTION                               *java-creator-detection*
+
+The plugin detects Java projects by walking up from the current working
+directory, looking for project marker files (|java-creator-project_markers|).
+
+Once a project root is found, the source directory is located by checking
+candidates in order:
+  1. `custom_src_path` (if configured)
+  2. Each `src_patterns` entry relative to project root
+  3. Each `src_patterns` entry under `backend/` (for monorepo layouts)
+
+The first existing directory match is used as the base for package
+resolution and file creation.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
