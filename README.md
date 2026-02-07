@@ -104,11 +104,12 @@ Suggested configuration is:
 ### Basic Commands
 
 ```vim
-:JavaNew       " Interactive creation wizard
-:JavaClass     " Create a new class
-:JavaInterface " Create a new interface  
-:JavaEnum      " Create a new enum
-:JavaRecord    " Create a new record (Java 16+)
+:JavaNew            " Interactive creation wizard
+:JavaClass          " Create a new class
+:JavaInterface      " Create a new interface  
+:JavaEnum           " Create a new enum
+:JavaRecord         " Create a new record (Java 16+)
+:JavaAbstractClass  " Create a new abstract class
 ```
 
 You can also set keymaps to bind this operation.
@@ -155,11 +156,12 @@ public abstract class %s {
 
   -- Custom key mappings
   keymaps = {
-    java_new = "<leader>jn",      -- Interactive Java file creation
-    java_class = "<leader>jc",    -- Create new class
-    java_interface = "<leader>ji",-- Create new interface
-    java_enum = "<leader>je",     -- Create new enum
-    java_record = "<leader>jr",   -- Create new record
+    java_new = "<leader>jn",              -- Interactive Java file creation
+    java_class = "<leader>jc",            -- Create new class
+    java_interface = "<leader>ji",        -- Create new interface
+    java_enum = "<leader>je",             -- Create new enum
+    java_record = "<leader>jr",           -- Create new record
+    java_abstract_class = "<leader>ja",   -- Create new abstract class
   },
 
   -- General options

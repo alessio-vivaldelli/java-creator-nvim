@@ -45,6 +45,7 @@ public abstract class %s {
 		java_interface = "<leader>ji",
 		java_enum = "<leader>je",
 		java_record = "<leader>jr",
+		java_abstract_class = "<leader>ja",
 	},
 
 	options = {
@@ -376,15 +377,8 @@ function utils.generate_file_path(package, name)
 		local package_path = package:gsub("%.", "/")
 		local full_dir = src_dir .. "/" .. package_path
 
-		-- Create all directories in the package path recursively
-		local parts = vim.split(package_path, "/")
-		local current_path = src_dir
-		for _, part in ipairs(parts) do
-			current_path = current_path .. "/" .. part
-			if vim.fn.isdirectory(current_path) == 0 then
-				vim.fn.mkdir(current_path, "p")
-			end
-		end
+		-- Create directories recursively
+		vim.fn.mkdir(full_dir, "p")
 
 		return full_dir .. "/" .. name .. ".java"
 	else
@@ -659,6 +653,11 @@ function M.java_record()
 	M.create_java_type_direct("record")
 end
 
+--- Shortcut function to create a Java abstract class.
+function M.java_abstract_class()
+	M.create_java_type_direct("abstract_class")
+end
+
 ---
 --- Sets up the plugin, commands, and keymaps.
 --- This is the main entry point for the user's configuration.
@@ -673,6 +672,7 @@ function M.setup(opts)
 	vim.api.nvim_create_user_command("JavaInterface", M.java_interface, { desc = "Create a new Java interface" })
 	vim.api.nvim_create_user_command("JavaEnum", M.java_enum, { desc = "Create a new Java enum" })
 	vim.api.nvim_create_user_command("JavaRecord", M.java_record, { desc = "Create a new Java record" })
+	vim.api.nvim_create_user_command("JavaAbstractClass", M.java_abstract_class, { desc = "Create a new Java abstract class" })
 
 	if M.config.keymaps then
 		local command_map = {
@@ -681,6 +681,7 @@ function M.setup(opts)
 			java_interface = "JavaInterface",
 			java_enum = "JavaEnum",
 			java_record = "JavaRecord",
+			java_abstract_class = "JavaAbstractClass",
 		}
 
 		for cmd, keymap in pairs(M.config.keymaps) do
@@ -691,8 +692,6 @@ function M.setup(opts)
 			end
 		end
 	end
-
-	utils.info("Java Creator plugin loaded")
 end
 
 return M
