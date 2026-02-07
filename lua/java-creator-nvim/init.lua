@@ -75,6 +75,10 @@ end
 ---
 function M.java_new()
 	load_modules()
+	if not utils.find_java_project_root() then
+		utils.error("Not in a Java project. No project marker found (pom.xml, build.gradle, etc.)")
+		return
+	end
 	ui.get_java_type(function(java_type)
 		if not java_type then
 			utils.info("Java file creation canceled.")
@@ -109,6 +113,10 @@ end
 ---@param java_type string The type of file to create (e.g., 'class').
 function M.create_java_type_direct(java_type)
 	load_modules()
+	if not utils.find_java_project_root() then
+		utils.error("Not in a Java project. No project marker found (pom.xml, build.gradle, etc.)")
+		return
+	end
 	ui.get_string("Name for " .. java_type .. ": ", "", function(name)
 		if not name or name == "" then
 			utils.error("Name is required.")
