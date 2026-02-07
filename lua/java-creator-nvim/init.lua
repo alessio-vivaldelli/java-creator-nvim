@@ -1,14 +1,20 @@
 -- lua/java-creator-nvim/init.lua
-local config = require("java-creator-nvim.config")
-local utils = require("java-creator-nvim.utils")
-local ui = require("java-creator-nvim.ui")
-
 local M = {}
 
--- Expose submodules for testability and extensibility
-M._config = config
-M._utils = utils
-M._ui = ui
+-- Lazy-load submodules to avoid require failures during plugin loading
+local config, utils, ui
+
+local function load_modules()
+	if not config then
+		config = require("java-creator-nvim.config")
+		utils = require("java-creator-nvim.utils")
+		ui = require("java-creator-nvim.ui")
+		-- Expose submodules for testability and extensibility
+		M._config = config
+		M._utils = utils
+		M._ui = ui
+	end
+end
 
 ---
 --- Creates the Java file after validating inputs.
@@ -17,6 +23,7 @@ M._ui = ui
 ---@param name string The class/interface/enum name.
 ---@param package string The package name.
 function M.create_java_file(java_type, name, package)
+	load_modules()
 	if java_type == "record" and config.options.options.java_version < 16 then
 		utils.error("Records require Java 16 or higher. Current version: " .. config.options.options.java_version)
 		return
@@ -67,6 +74,7 @@ end
 --- It guides the user through selecting type, name, and package.
 ---
 function M.java_new()
+	load_modules()
 	ui.get_java_type(function(java_type)
 		if not java_type then
 			utils.info("Java file creation canceled.")
@@ -100,6 +108,7 @@ end
 ---
 ---@param java_type string The type of file to create (e.g., 'class').
 function M.create_java_type_direct(java_type)
+	load_modules()
 	ui.get_string("Name for " .. java_type .. ": ", "", function(name)
 		if not name or name == "" then
 			utils.error("Name is required.")
@@ -148,6 +157,7 @@ end
 ---
 ---@param opts table|nil User-provided configuration to override defaults.
 function M.setup(opts)
+	load_modules()
 	config.setup(opts)
 
 	vim.api.nvim_create_user_command("JavaNew", M.java_new, { desc = "Create a new Java file interactively" })
